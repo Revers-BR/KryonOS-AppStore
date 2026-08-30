@@ -8,9 +8,13 @@
       "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/graphic_demo/app.json",
       "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/graphic_demo/main.js"
     },
-    "Hello World": {
+    "Hello World JS": {
       "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/hello_world/app.json",
       "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/hello_world/main.js"
+    },
+    "Hello World Lua": {
+      "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/hello_world_lua/app.json",
+      "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/hello_world_lua/main.lua"
     },
     "Modern Ui": {
       "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/modern_ui/app.json",
