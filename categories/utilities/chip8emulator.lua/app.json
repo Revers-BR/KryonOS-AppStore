@@ -1,0 +1,12 @@
+{
+  "name": "CHIP-8 Emulator",
+  "packageName": "com.sabino.chip8emulator.lua",
+  "version": "1.0.0",
+  "metaUrl": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Games/chip8emulator.lua/app.json",
+  "api": 1,
+  "author": "KryonOS Team",
+  "type": "App",
+  "category": "Utility",
+  "description": "Emulador CHIP-8 completo com 3 telas: emulador (display 64x32 + teclado hex), debug (registradores, stack, breakpoints, step/run) e editor de código com disassembler automático, teclado virtual para instruções e suporte a ROMs em /local/roms e /sd/roms/ch8.",
+  "changelog": "Lançamento inicial com interpretador CHIP-8 completo (35 opcodes), disassembler/assembler bidirecional, editor de instruções com teclado virtual, sistema de breakpoints tocáveis, auto-scroll sincronizado com o PC durante debug, e tela de ajuda com todos os comandos disponíveis."
+}
