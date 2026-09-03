@@ -1,0 +1,12 @@
+{
+  "name": "KryonBench WREN",
+  "packageName": "com.sabino.kryonbench.wren",
+  "version": "1.0.1",
+  "metaUrl": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.wren/app.json",
+  "api": 2,
+  "author": "KryonOS Team",
+  "type": "App",
+  "category": "Benchmark",
+  "description": "Ferramenta de benchmark complexo para testes de estresse de CPU, RAM, Garbage Collector e FPS.",
+  "changelog": ""
+}

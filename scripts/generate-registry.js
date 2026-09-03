@@ -30,6 +30,9 @@ function getMainFileName(appPath) {
     if (fs.existsSync(path.join(appPath, 'main.lua'))) {
         return 'main.lua';
     }
+    if (fs.existsSync(path.join(appPath, 'main.wren'))) {
+        return 'main.wren';
+    }
     if (fs.existsSync(path.join(appPath, 'main.js'))) {
         return 'main.js';
     }
@@ -55,7 +58,7 @@ if (fs.existsSync(categoriesDir)) {
                     const mainFile = getMainFileName(appPath);
 
                     if (!mainFile) {
-console.warn(`[AVISO] Nenhum main.luac, main.lua ou main.js encontrado em: ${category}/${appDir}`);                        continue;
+console.warn(`[AVISO] Nenhum main.luac, main.lua, main.wren ou main.js encontrado em: ${category}/${appDir}`);                        continue;
                     }
 
                     const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));

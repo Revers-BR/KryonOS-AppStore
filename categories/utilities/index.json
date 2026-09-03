@@ -28,6 +28,18 @@
       "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/clock/app.json",
       "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/clock/main.js"
     },
+    "KryonBench JS": {
+      "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.js/app.json",
+      "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.js/main.js"
+    },
+    "KryonBench Lua": {
+      "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.lua/app.json",
+      "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.lua/main.lua"
+    },
+    "KryonBench WREN": {
+      "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.wren/app.json",
+      "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/kryonbench.wren/main.wren"
+    },
     "Notepad": {
       "meta": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/Notepad/app.json",
       "app": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/utilities/Notepad/main.js"
