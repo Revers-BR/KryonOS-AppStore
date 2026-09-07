@@ -1,0 +1,12 @@
+{
+  "name": "Hello World Wren",
+  "packageName": "com.kryonos.helloworld.wren",
+  "version": "1.0.0",
+  "metaUrl": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Demos/hello_world_wren/app.json",
+  "api": 2,
+  "author": "KryonOS Team",
+  "type": "App",
+  "category": "Utility",
+  "description": "A simple Hello World application.",
+  "changelog": ""
+}

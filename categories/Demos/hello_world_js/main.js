@@ -79,7 +79,3 @@ while (true) {
     // Necessário para não travar o kernel e permitir GC.
     Harix.delay(10);
 }
-
-// Ao sair do loop, o script termina.
-// O KryonOS/HarixOS pode então devolver o controle ao sistema.
-Display.fillScreen(BLUE);
