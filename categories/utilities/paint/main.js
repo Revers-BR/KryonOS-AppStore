@@ -3,74 +3,90 @@
 
 // Define layout
 var PALETTE_HEIGHT = 40;
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 // Colors available
+var RED = 0xF800;
+var GREEN = 0x07E0;
+var BLUE = 0x001F;
+var YELLOW = 0xFFE0;
+var WHITE = 0xFFFF;
+var BLACK = 0x0000;
+var DARKGREY = 0x7BEF;
+
 var colors = [RED, GREEN, BLUE, YELLOW, WHITE];
 var selectedColor = WHITE;
 
 // Draw initial UI
 function drawUI() {
-    System.fillScreen(BLACK);
+    Display.fillScreen(BLACK);
     
     // Draw palette bar
-    System.fillRect(0, 0, SW, PALETTE_HEIGHT, DARKGREY);
+    Display.fillRect(0, 0, SW, PALETTE_HEIGHT, DARKGREY);
     
     // Draw color buttons
     var btnWidth = SW / (colors.length + 1); // +1 for clear button
     for (var i = 0; i < colors.length; i++) {
         var cx = i * btnWidth;
-        System.fillRect(cx + 2, 2, btnWidth - 4, PALETTE_HEIGHT - 4, colors[i]);
+        Display.fillRect(cx + 2, 2, btnWidth - 4, PALETTE_HEIGHT - 4, colors[i]);
         
         // Highlight selected
         if (colors[i] === selectedColor) {
-            System.drawRect(cx, 0, btnWidth, PALETTE_HEIGHT, WHITE);
-            System.drawRect(cx + 1, 1, btnWidth - 2, PALETTE_HEIGHT - 2, WHITE);
+            Display.drawRect(cx, 0, btnWidth, PALETTE_HEIGHT, WHITE);
+            Display.drawRect(cx + 1, 1, btnWidth - 2, PALETTE_HEIGHT - 2, WHITE);
         }
     }
     
     // Draw clear button
     var clearX = colors.length * btnWidth;
-    System.fillRect(clearX + 2, 2, btnWidth - 4, PALETTE_HEIGHT - 4, BLACK);
-    System.drawRect(clearX + 2, 2, btnWidth - 4, PALETTE_HEIGHT - 4, WHITE);
-    System.setTextColor(WHITE, BLACK);
-    System.drawString("CLR", clearX + 8, 12, 2);
+    Display.fillRect(clearX + 2, 2, btnWidth - 4, PALETTE_HEIGHT - 4, BLACK);
+    Display.drawRect(clearX + 2, 2, btnWidth - 4, PALETTE_HEIGHT - 4, WHITE);
+    Display.setTextColor(WHITE, BLACK);
+    Display.drawString("CLR", clearX + 8, 12, 2);
 }
 
 drawUI();
 
 // Main interaction loop
 while (true) {
-    var touch = System.getTouch();
+    var touch = Input.getTouch();
     
-    // The red X button is drawn at (200, 0, 40, 30) by the OS
-    // If we touch there, the OS will exit the app automatically.
-    // We just need to handle our own UI.
+    // Check for exit condition (top-right corner)
+    if (touch.touched && touch.x >= SW - 40 && touch.y <= 40) {
+        break;
+    }
     
-    if (touch.touched) {
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+    
+    if (touch.touched && touch.x < SW - 40) { // Avoid OS close button area
         if (touch.y < PALETTE_HEIGHT) {
-            // Touched the palette area (avoiding the top right X button at x > 200)
-            if (touch.x < 200) {
-                var btnWidth = SW / (colors.length + 1);
-                var idx = Math.floor(touch.x / btnWidth);
-                
-                if (idx < colors.length) {
-                    // Changed color
-                    selectedColor = colors[idx];
-                    drawUI(); // Redraw UI to update highlight
-                    System.delay(200); // Debounce
-                } else if (idx === colors.length) {
-                    // Clear canvas
-                    drawUI(); 
-                    System.delay(200); // Debounce
-                }
+            // Touched the palette area
+            var btnWidth = SW / (colors.length + 1);
+            var idx = Math.floor(touch.x / btnWidth);
+            
+            if (idx < colors.length) {
+                // Changed color
+                selectedColor = colors[idx];
+                drawUI(); // Redraw UI to update highlight
+                Harix.delay(200); // Debounce
+            } else if (idx === colors.length) {
+                // Clear canvas
+                drawUI(); 
+                Harix.delay(200); // Debounce
             }
         } else {
             // Touched the canvas area! Draw!
-            System.fillCircle(touch.x, touch.y, 4, selectedColor);
+            Display.fillCircle(touch.x, touch.y, 4, selectedColor);
         }
     }
     
-    System.delay(10); // Yield to prevent lockup
+    Harix.delay(10); // Yield to prevent lockup
 }
+
+// Cleanup
+Display.fillScreen(BLACK);

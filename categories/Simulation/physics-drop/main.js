@@ -1,6 +1,6 @@
 // Physics Drop - Verlet Integration Sandbox
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 var BLACK = 0x0000;
 var WHITE = 0xFFFF;
@@ -118,73 +118,73 @@ function constrainPoints() {
 }
 
 var SLICE_HEIGHT = 40;
-var useSprite = System.createSprite(SW, SLICE_HEIGHT);
+var useSprite = Sprite.create(SW, SLICE_HEIGHT);
 
 function drawScene() {
     if (useSprite) {
         for (var slice = 0; slice < 8; slice++) {
             var startY = slice * SLICE_HEIGHT;
-            System.bindSprite(true);
-            System.fillScreen(BLACK);
+            Sprite.bind(true);
+            Display.fillScreen(BLACK);
             
             // Draw sticks
             for (var i = 0; i < sticks.length; i++) {
                 var s = sticks[i];
                 var p0 = points[s.p0];
                 var p1 = points[s.p1];
-                System.drawLine(Math.floor(p0.x), Math.floor(p0.y) - startY, Math.floor(p1.x), Math.floor(p1.y) - startY, WHITE);
+                Display.drawLine(Math.floor(p0.x), Math.floor(p0.y) - startY, Math.floor(p1.x), Math.floor(p1.y) - startY, WHITE);
             }
             
             // Draw points
             for (var j = 0; j < points.length; j++) {
                 var p = points[j];
-                System.fillRect(Math.floor(p.x) - 1, Math.floor(p.y) - 1 - startY, 3, 3, BLUE);
+                Display.fillRect(Math.floor(p.x) - 1, Math.floor(p.y) - 1 - startY, 3, 3, BLUE);
             }
             
             // Draw instructions
             if (points.length === 0) {
-                System.setTextColor(WHITE, BLACK);
-                System.drawString("Draw falling lines!", 40, 160 - startY, 2);
+                Display.setTextColor(WHITE, BLACK);
+                Display.drawString("Draw falling lines!", 40, 160 - startY, 2);
             } else {
-                System.setTextColor(WHITE, BLACK);
-                System.drawString("Points: " + points.length + "/" + MAX_POINTS, 70, 10 - startY, 1);
+                Display.setTextColor(WHITE, BLACK);
+                Display.drawString("Points: " + points.length + "/" + MAX_POINTS, 70, 10 - startY, 1);
             }
             
             // Draw clear button on top left
-            System.fillRect(0, 0 - startY, 60, 30, RED);
-            System.setTextColor(WHITE, RED);
-            System.drawString("CLEAR", 15, 10 - startY, 1);
+            Display.fillRect(0, 0 - startY, 60, 30, RED);
+            Display.setTextColor(WHITE, RED);
+            Display.drawString("CLEAR", 15, 10 - startY, 1);
             
-            System.bindSprite(false);
-            System.pushSprite(0, startY);
+            Sprite.bind(false);
+            Sprite.push(0, startY);
         }
     } else {
         // Fallback to direct rendering if sprite allocation failed
-        System.fillScreen(BLACK);
+        Display.fillScreen(BLACK);
         
         for (var i = 0; i < sticks.length; i++) {
             var s = sticks[i];
             var p0 = points[s.p0];
             var p1 = points[s.p1];
-            System.drawLine(Math.floor(p0.x), Math.floor(p0.y), Math.floor(p1.x), Math.floor(p1.y), WHITE);
+            Display.drawLine(Math.floor(p0.x), Math.floor(p0.y), Math.floor(p1.x), Math.floor(p1.y), WHITE);
         }
         
         for (var j = 0; j < points.length; j++) {
             var p = points[j];
-            System.fillRect(Math.floor(p.x) - 1, Math.floor(p.y) - 1, 3, 3, BLUE);
+            Display.fillRect(Math.floor(p.x) - 1, Math.floor(p.y) - 1, 3, 3, BLUE);
         }
         
         if (points.length === 0) {
-            System.setTextColor(WHITE, BLACK);
-            System.drawString("Draw falling lines!", 40, 160, 2);
+            Display.setTextColor(WHITE, BLACK);
+            Display.drawString("Draw falling lines!", 40, 160, 2);
         } else {
-            System.setTextColor(WHITE, BLACK);
-            System.drawString("Points: " + points.length + "/" + MAX_POINTS, 70, 10, 1);
+            Display.setTextColor(WHITE, BLACK);
+            Display.drawString("Points: " + points.length + "/" + MAX_POINTS, 70, 10, 1);
         }
         
-        System.fillRect(0, 0, 60, 30, RED);
-        System.setTextColor(WHITE, RED);
-        System.drawString("CLEAR", 15, 10, 1);
+        Display.fillRect(0, 0, 60, 30, RED);
+        Display.setTextColor(WHITE, RED);
+        Display.drawString("CLEAR", 15, 10, 1);
     }
 }
 
@@ -193,9 +193,20 @@ drawScene();
 
 // Main Game Loop
 while (true) {
-    var t = System.getTouch();
+    var t = Input.getTouch();
     
-    if (t.touched) {
+    // Check for exit condition (top-right corner)
+    if (t.touched && t.x >= SW - 40 && t.y <= 40) {
+        break;
+    }
+    
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+    
+    if (t.touched && t.x < SW - 40) { // Avoid OS close button area
         // Check for clear button (top-left)
         if (t.x < 60 && t.y < 30) {
             points = [];
@@ -203,8 +214,8 @@ while (true) {
             isDrawing = false;
             lastPointIdx = -1;
             drawScene();
-            System.delay(300); // debounce
-        } else if (t.x < 200 || t.y > 40) { // Don't draw if touching OS close area
+            Harix.delay(300); // debounce
+        } else if (t.x < SW - 40) {
             if (!isDrawing) {
                 isDrawing = true;
                 lastPointIdx = addPoint(t.x, t.y);
@@ -251,5 +262,11 @@ while (true) {
     
     drawScene();
     
-    System.delay(10); // GC and yield
+    Harix.delay(10); // GC and yield
 }
+
+// Cleanup
+if (useSprite) {
+    Sprite.delete();
+}
+Display.fillScreen(BLACK);

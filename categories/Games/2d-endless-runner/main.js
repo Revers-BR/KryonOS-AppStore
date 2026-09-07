@@ -1,15 +1,15 @@
 // 2D Endless Runner
 // Uses Sliced Rendering for 0% Flickering
 
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 var SLICE_H = 32; // Reduced slice height to drastically decrease RAM requirement
 var SLICES = Math.ceil(SH / SLICE_H);
 
 // Allocate Sliced Double Buffer
-if (!System.createSprite(SW, SLICE_H)) {
-    System.print("Error: Not enough memory for sprite buffer!");
-    while (true) System.delay(100);
+if (!Sprite.create(SW, SLICE_H)) {
+    Harix.print("Error: Not enough memory for sprite buffer!");
+    while (true) Harix.delay(100);
 }
 
 // Colors
@@ -44,11 +44,11 @@ var distanceTraveled = 0;
 var entities = []; // Array of objects: { type: "train"|"coin", lane: 0..2, y: int, h: int }
 
 // Timing & Input
-var lastTime = System.millis();
+var lastTime = Harix.millis();
 var lastTouch = false;
 var fps = 0;
 var frames = 0;
-var lastFpsTime = System.millis();
+var lastFpsTime = Harix.millis();
 var spawnTimer = 0;
 
 // Reset Game
@@ -59,7 +59,7 @@ function resetGame() {
     distanceTraveled = 0;
     entities = [];
     spawnTimer = 0;
-    lastTime = System.millis();
+    lastTime = Harix.millis();
 }
 
 // Update Game Logic
@@ -68,7 +68,7 @@ function update(dt) {
     distanceTraveled += moveDist;
 
     // Animate Player Bobbing
-    playerBob = Math.sin(System.millis() / 150.0) * 5;
+    playerBob = Math.sin(Harix.millis() / 150.0) * 5;
 
     // Spawn Entities
     spawnTimer += dt;
@@ -134,8 +134,8 @@ function update(dt) {
 
 // Drawing Functions (All rendering happens inside the Sliced loop)
 function drawSlice(sliceY, dt) {
-    System.bindSprite(true);
-    System.fillScreen(C_BG);
+    Sprite.bind(true);
+    Display.fillScreen(C_BG);
 
     // --- Draw Background / Lanes ---
     // Moving track lines
@@ -143,8 +143,8 @@ function drawSlice(sliceY, dt) {
     for (var y = -40; y < SH; y += 40) {
         var realY = y + trackOffset;
         if (realY >= sliceY && realY < sliceY + SLICE_H + 40) {
-            System.fillRect(80 - 2, realY - sliceY, 4, 20, C_LANE);
-            System.fillRect(160 - 2, realY - sliceY, 4, 20, C_LANE);
+            Display.fillRect(80 - 2, realY - sliceY, 4, 20, C_LANE);
+            Display.fillRect(160 - 2, realY - sliceY, 4, 20, C_LANE);
         }
     }
 
@@ -155,11 +155,11 @@ function drawSlice(sliceY, dt) {
             if (e.y + e.h >= sliceY && e.y < sliceY + SLICE_H) {
                 var ex = lanes[e.lane];
                 if (e.type === "train") {
-                    System.fillRoundRect(ex - 30, e.y - sliceY, 60, e.h, 5, C_TRAIN);
-                    System.fillRect(ex - 25, e.y - sliceY + 5, 50, 15, 0x0000); // Window
+                    Display.fillRoundRect(ex - 30, e.y - sliceY, 60, e.h, 5, C_TRAIN);
+                    Display.fillRect(ex - 25, e.y - sliceY + 5, 50, 15, 0x0000); // Window
                 } else if (e.type === "coin") {
-                    System.fillCircle(ex, e.y - sliceY, 15, C_COIN);
-                    System.fillCircle(ex, e.y - sliceY, 10, 0xFEA0); // Inner highlight
+                    Display.fillCircle(ex, e.y - sliceY, 15, C_COIN);
+                    Display.fillCircle(ex, e.y - sliceY, 10, 0xFEA0); // Inner highlight
                 }
             }
         }
@@ -169,96 +169,102 @@ function drawSlice(sliceY, dt) {
             var px = lanes[playerLane];
             var py = playerY + playerBob;
             // Hoverboard shadow
-            System.fillRoundRect(px - 15, py - sliceY - 10, 30, 40, 8, 0x0000);
+            Display.fillRoundRect(px - 15, py - sliceY - 10, 30, 40, 8, 0x0000);
             // Hoverboard body
-            System.fillRoundRect(px - 15, py - sliceY - 15, 30, 40, 8, C_PLAYER);
+            Display.fillRoundRect(px - 15, py - sliceY - 15, 30, 40, 8, C_PLAYER);
             // Engine glow
-            System.fillCircle(px, py - sliceY + 20, 8, 0x07FF);
+            Display.fillCircle(px, py - sliceY + 20, 8, 0x07FF);
         }
 
         // --- HUD ---
         if (sliceY === 0) { // Only draw on top slice
-            System.setTextColor(C_TEXT, C_BG);
-            System.drawString("SCORE: " + score, 10, 10, 2);
+            Display.setTextColor(C_TEXT, C_BG);
+            Display.drawString("SCORE: " + score, 10, 10, 2);
         }
     }
     else if (currentState === STATE_MENU) {
         // Animated Menu text
-        var titleBob = Math.sin(System.millis() / 200.0) * 10;
+        var titleBob = Math.sin(Harix.millis() / 200.0) * 10;
 
-        System.setTextColor(0x07FF, C_BG);
-        System.drawString("NEON", 70, 50 + titleBob - sliceY, 4);
+        Display.setTextColor(0x07FF, C_BG);
+        Display.drawString("NEON", 70, 50 + titleBob - sliceY, 4);
 
-        System.setTextColor(0x07FF, C_BG);
-        System.drawString("SURFER", 50, 100 + titleBob - sliceY, 4);
+        Display.setTextColor(0x07FF, C_BG);
+        Display.drawString("SURFER", 50, 100 + titleBob - sliceY, 4);
 
         // Start Button at Y=180
-        System.fillRoundRect(40, 180 - sliceY, 160, 40, 5, 0x07E0);
-        System.setTextColor(0x0000, 0x07E0);
-        System.drawString("START GAME", 65, 192 - sliceY, 2);
+        Display.fillRoundRect(40, 180 - sliceY, 160, 40, 5, 0x07E0);
+        Display.setTextColor(0x0000, 0x07E0);
+        Display.drawString("START GAME", 65, 192 - sliceY, 2);
 
         // Settings Button at Y=240
-        System.fillRoundRect(40, 240 - sliceY, 160, 40, 5, 0x7BEF);
-        System.setTextColor(0x0000, 0x7BEF);
-        System.drawString("SETTINGS", 75, 252 - sliceY, 2);
+        Display.fillRoundRect(40, 240 - sliceY, 160, 40, 5, 0x7BEF);
+        Display.setTextColor(0x0000, 0x7BEF);
+        Display.drawString("SETTINGS", 75, 252 - sliceY, 2);
     }
     else if (currentState === STATE_SETTINGS) {
-        System.setTextColor(C_TEXT, C_BG);
-        System.drawString("SETTINGS", 60, 30 - sliceY, 4);
+        Display.setTextColor(C_TEXT, C_BG);
+        Display.drawString("SETTINGS", 60, 30 - sliceY, 4);
 
         // FPS Toggle Y=100
-        System.fillRoundRect(20, 100 - sliceY, 200, 40, 5, showFPS ? 0x07E0 : 0x7BEF);
-        System.setTextColor(0x0000, showFPS ? 0x07E0 : 0x7BEF);
-        System.drawString("FPS Counter: " + (showFPS ? "ON" : "OFF"), 40, 112 - sliceY, 2);
+        Display.fillRoundRect(20, 100 - sliceY, 200, 40, 5, showFPS ? 0x07E0 : 0x7BEF);
+        Display.setTextColor(0x0000, showFPS ? 0x07E0 : 0x7BEF);
+        Display.drawString("FPS Counter: " + (showFPS ? "ON" : "OFF"), 40, 112 - sliceY, 2);
 
         // Temp Toggle Y=160
-        System.fillRoundRect(20, 160 - sliceY, 200, 40, 5, showTemp ? 0x07E0 : 0x7BEF);
-        System.setTextColor(0x0000, showTemp ? 0x07E0 : 0x7BEF);
-        System.drawString("Temp Counter: " + (showTemp ? "ON" : "OFF"), 35, 172 - sliceY, 2);
+        Display.fillRoundRect(20, 160 - sliceY, 200, 40, 5, showTemp ? 0x07E0 : 0x7BEF);
+        Display.setTextColor(0x0000, showTemp ? 0x07E0 : 0x7BEF);
+        Display.drawString("Temp Counter: " + (showTemp ? "ON" : "OFF"), 35, 172 - sliceY, 2);
 
         // Back Button Y=250
-        System.fillRoundRect(40, 250 - sliceY, 160, 40, 5, 0xF800);
-        System.setTextColor(0x0000, 0xF800);
-        System.drawString("BACK", 95, 262 - sliceY, 2);
+        Display.fillRoundRect(40, 250 - sliceY, 160, 40, 5, 0xF800);
+        Display.setTextColor(0x0000, 0xF800);
+        Display.drawString("BACK", 95, 262 - sliceY, 2);
     }
     else if (currentState === STATE_GAMEOVER) {
-        System.setTextColor(0xF800, C_BG);
-        System.drawString("CRASHED!", 50, 120 - sliceY, 4);
+        Display.setTextColor(0xF800, C_BG);
+        Display.drawString("CRASHED!", 50, 120 - sliceY, 4);
 
-        System.setTextColor(C_TEXT, C_BG);
-        System.drawString("FINAL SCORE: " + score, 45, 160 - sliceY, 2);
+        Display.setTextColor(C_TEXT, C_BG);
+        Display.drawString("FINAL SCORE: " + score, 45, 160 - sliceY, 2);
 
-        System.fillRoundRect(40, 220 - sliceY, 160, 40, 5, 0x07E0);
-        System.setTextColor(0x0000, 0x07E0);
-        System.drawString("PLAY AGAIN", 65, 232 - sliceY, 2);
+        Display.fillRoundRect(40, 220 - sliceY, 160, 40, 5, 0x07E0);
+        Display.setTextColor(0x0000, 0x07E0);
+        Display.drawString("PLAY AGAIN", 65, 232 - sliceY, 2);
     }
 
     // --- Global Overlays (FPS/Temp) ---
     if (sliceY === 0) {
         if (showFPS) {
-            System.setTextColor(0xFFE0, C_BG);
-            System.drawString("FPS: " + fps, 170, 10, 2);
+            Display.setTextColor(0xFFE0, C_BG);
+            Display.drawString("FPS: " + fps, 170, 10, 2);
         }
-        if (showTemp && System.hasTemperatureSensor()) {
-            System.setTextColor(0x07FF, C_BG);
-            System.drawString(System.getTemperature().toFixed(1) + "C", 170, 30, 2);
+        if (showTemp && Harix.hasTemperatureSensor()) {
+            Display.setTextColor(0x07FF, C_BG);
+            Display.drawString(Harix.getTemperature().toFixed(1) + "C", 170, 30, 2);
         }
     }
 
-    System.bindSprite(false);
-    System.pushSprite(0, sliceY);
+    Sprite.bind(false);
+    Sprite.push(0, sliceY);
 }
 
 // Input Handling
 function handleInput() {
-    var t = System.getTouch();
+    var t = Input.getTouch();
 
-    // Check for exit
-    if (t.touched && t.y < 20 && t.x > 200) {
+    // Check for exit (top-right corner)
+    if (t.touched && t.x >= SW - 40 && t.y <= 40) {
         return true; // Exit app
     }
 
-    if (t.touched && !lastTouch) {
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        return true; // Exit app
+    }
+
+    if (t.touched && !lastTouch && t.x < SW - 40) {
         if (currentState === STATE_MENU) {
             if (t.y > 190 && t.y < 240) {
                 resetGame();
@@ -297,7 +303,7 @@ function handleInput() {
 
 // Main Loop
 while (true) {
-    var now = System.millis();
+    var now = Harix.millis();
     var dt = (now - lastTime) / 1000.0; // Delta time in seconds
     lastTime = now;
 
@@ -324,8 +330,8 @@ while (true) {
     }
 
     // Yield to OS
-    System.delay(1);
+    Harix.delay(1);
 }
 
-System.deleteSprite();
-System.fillScreen(0x0000);
+Sprite.delete();
+Display.fillScreen(0x0000);

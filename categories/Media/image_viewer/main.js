@@ -13,7 +13,7 @@ var currentView = 0; // 0 = List, 1 = Image
 
 function scanImages() {
     imageFiles = [];
-    var files = FS.listDir("/sd/");
+    var files = FileSystem.listDir("/sd/");
     if (!files || files.length === 0) return;
     
     // Add ALL files without filtering
@@ -24,14 +24,14 @@ function scanImages() {
 }
 
 function drawList() {
-    System.fillScreen(C_BG);
-    System.setTextColor(C_ACCENT, C_BG);
-    System.drawString("IMAGE VIEWER", 10, 10, 4);
+    Display.fillScreen(C_BG);
+    Display.setTextColor(C_ACCENT, C_BG);
+    Display.drawString("IMAGE VIEWER", 10, 10, 4);
     
     if (imageFiles.length === 0) {
-        System.setTextColor(0xF800, C_BG);
-        System.drawString("No files found", 10, 60, 2);
-        System.drawString("on SD Card.", 10, 80, 2);
+        Display.setTextColor(0xF800, C_BG);
+        Display.drawString("No files found", 10, 60, 2);
+        Display.drawString("on SD Card.", 10, 80, 2);
         return;
     }
     
@@ -43,49 +43,49 @@ function drawList() {
         var y = 45 + (i * 30);
         
         if (listIndex === selectedIndex) {
-            System.fillRoundRect(5, y - 5, 230, 25, 4, C_SELECT);
-            System.setTextColor(C_TEXT, C_SELECT);
+            Display.fillRoundRect(5, y - 5, 230, 25, 4, C_SELECT);
+            Display.setTextColor(C_TEXT, C_SELECT);
         } else {
-            System.setTextColor(C_TEXT, C_BG);
+            Display.setTextColor(C_TEXT, C_BG);
         }
         
         // Extract filename for display (everything after last slash)
         var pathStr = imageFiles[listIndex];
         var lastSlash = pathStr.lastIndexOf("/");
         var dispName = lastSlash >= 0 ? pathStr.substring(lastSlash + 1) : pathStr;
-        System.drawString(dispName, 15, y, 2);
+        Display.drawString(dispName, 15, y, 2);
     }
     
     // Draw footer buttons
-    System.setTextColor(C_TEXT, C_BG);
-    System.drawString("UP", 30, 295, 2);
-    System.drawString("|", 80, 295, 2);
-    System.drawString("VIEW", 105, 295, 2);
-    System.drawString("|", 160, 295, 2);
-    System.drawString("DN", 190, 295, 2);
+    Display.setTextColor(C_TEXT, C_BG);
+    Display.drawString("UP", 30, 295, 2);
+    Display.drawString("|", 80, 295, 2);
+    Display.drawString("VIEW", 105, 295, 2);
+    Display.drawString("|", 160, 295, 2);
+    Display.drawString("DN", 190, 295, 2);
 }
 
 function drawImage(path) {
-    System.fillScreen(C_BG);
-    System.setTextColor(C_TEXT, C_BG);
-    System.drawString("Loading...", 80, 150, 2);
+    Display.fillScreen(C_BG);
+    Display.setTextColor(C_TEXT, C_BG);
+    Display.drawString("Loading...", 80, 150, 2);
     
-    // Call the newly added native C++ streaming API
-    var success = System.drawBMP(path, 0, 0);
+    // Call the native BMP drawing API
+    var success = Display.drawBMP(path, 0, 0);
     
     if (!success) {
-        System.fillScreen(C_BG);
-        System.setTextColor(0xF800, C_BG);
-        System.drawString("ERROR:", 10, 80, 4);
-        System.setTextColor(C_TEXT, C_BG);
-        System.drawString("Invalid BMP format.", 10, 130, 2);
-        System.drawString("Unsupported or damaged file.", 10, 150, 2);
+        Display.fillScreen(C_BG);
+        Display.setTextColor(0xF800, C_BG);
+        Display.drawString("ERROR:", 10, 80, 4);
+        Display.setTextColor(C_TEXT, C_BG);
+        Display.drawString("Invalid BMP format.", 10, 130, 2);
+        Display.drawString("Unsupported or damaged file.", 10, 150, 2);
     }
     
     // Footer back button overlay
-    System.fillRoundRect(80, 290, 80, 25, 5, 0xF800); // Red
-    System.setTextColor(C_TEXT, 0xF800);
-    System.drawString("BACK", 100, 295, 2);
+    Display.fillRoundRect(80, 290, 80, 25, 5, 0xF800); // Red
+    Display.setTextColor(C_TEXT, 0xF800);
+    Display.drawString("BACK", 100, 295, 2);
 }
 
 // Initial state
@@ -95,10 +95,22 @@ drawList();
 var lastTouch = false;
 
 while (true) {
-    var t = System.getTouch();
+    var t = Input.getTouch();
+    
+    // Check for exit condition (top-right corner)
+    if (t.touched && t.x >= Display.screenWidth() - 40 && t.y <= 40) {
+        break;
+    }
+    
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+    
     var isTapped = t.touched && !lastTouch;
     
-    if (isTapped) {
+    if (isTapped && t.x < Display.screenWidth() - 40) { // Avoid OS close button area
         if (currentView === 0) {
             // Check footer buttons
             if (t.y >= 280) {
@@ -109,8 +121,10 @@ while (true) {
                         drawList();
                     }
                 } else if (t.x >= 80 && t.x <= 160) { // VIEW
-                    currentView = 1;
-                    drawImage(imageFiles[selectedIndex]);
+                    if (imageFiles.length > 0) {
+                        currentView = 1;
+                        drawImage(imageFiles[selectedIndex]);
+                    }
                 } else if (t.x > 160) { // DN
                     if (selectedIndex < imageFiles.length - 1) {
                         selectedIndex++;
@@ -136,5 +150,8 @@ while (true) {
     }
     
     lastTouch = t.touched;
-    System.delay(20);
+    Harix.delay(20);
 }
+
+// Cleanup
+Display.fillScreen(C_BG);

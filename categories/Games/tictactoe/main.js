@@ -1,8 +1,8 @@
 // HarixOS Tic-Tac-Toe Game
 // Play against a Bot!
 
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 var STATE_MENU = 0;
 var STATE_PLAYING = 1;
@@ -16,41 +16,49 @@ var winner = 0; // 0=None, 1=Player, 2=Bot, 3=Draw
 var difficulty = 0; // 0=Easy, 1=Medium, 2=Hard, 3=Extreme
 var diffNames = ["Easy", "Medium", "Hard", "Extreme"];
 
+// Colors
+var BLACK = 0x0000;
+var WHITE = 0xFFFF;
+var RED = 0xF800;
+var GREEN = 0x07E0;
+var BLUE = 0x001F;
+var DARKGREY = 0x7BEF;
+
 // Math.random polyfill if needed, but Duktape has it
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
 function drawMenu() {
-    System.fillScreen(BLACK);
-    System.setTextColor(GREEN, BLACK);
-    System.drawString("TIC TAC TOE", 20, 50, 4);
+    Display.fillScreen(BLACK);
+    Display.setTextColor(GREEN, BLACK);
+    Display.drawString("TIC TAC TOE", 20, 50, 4);
     
-    System.setTextColor(WHITE, BLACK);
-    System.drawString("Difficulty: " + diffNames[difficulty], 20, 100, 2);
+    Display.setTextColor(WHITE, BLACK);
+    Display.drawString("Difficulty: " + diffNames[difficulty], 20, 100, 2);
     
     // Difficulty Button
-    System.fillRoundRect(20, 140, 90, 40, 5, BLUE);
-    System.setTextColor(WHITE, BLUE);
-    System.drawString("CHANGE", 25, 150, 2);
+    Display.fillRoundRect(20, 140, 90, 40, 5, BLUE);
+    Display.setTextColor(WHITE, BLUE);
+    Display.drawString("CHANGE", 25, 150, 2);
     
     // Play Button
-    System.fillRoundRect(130, 140, 90, 40, 5, RED);
-    System.setTextColor(WHITE, RED);
-    System.drawString("PLAY", 155, 150, 2);
+    Display.fillRoundRect(130, 140, 90, 40, 5, RED);
+    Display.setTextColor(WHITE, RED);
+    Display.drawString("PLAY", 155, 150, 2);
     
-    System.setTextColor(DARKGREY, BLACK);
-    System.drawString("You: X    Bot: O", 40, 240, 2);
+    Display.setTextColor(DARKGREY, BLACK);
+    Display.drawString("You: X    Bot: O", 40, 240, 2);
 }
 
 function drawGrid() {
-    System.fillScreen(BLACK);
-    System.setTextColor(WHITE, BLACK);
-    System.drawString("Tic Tac Toe", 10, 10, 4);
+    Display.fillScreen(BLACK);
+    Display.setTextColor(WHITE, BLACK);
+    Display.drawString("Tic Tac Toe", 10, 10, 4);
     if (turn === 1) {
-        System.drawString("Your Turn (X)", 10, 40, 2);
+        Display.drawString("Your Turn (X)", 10, 40, 2);
     } else {
-        System.drawString("Bot Thinking...", 10, 40, 2);
+        Display.drawString("Bot Thinking...", 10, 40, 2);
     }
 
     var cellSize = 60;
@@ -59,8 +67,8 @@ function drawGrid() {
 
     // Draw grid lines
     for (var k = 1; k < 3; k++) {
-        System.fillRect(offsetX + k * cellSize - 2, offsetY, 4, cellSize * 3, WHITE);
-        System.fillRect(offsetX, offsetY + k * cellSize - 2, cellSize * 3, 4, WHITE);
+        Display.fillRect(offsetX + k * cellSize - 2, offsetY, 4, cellSize * 3, WHITE);
+        Display.fillRect(offsetX, offsetY + k * cellSize - 2, cellSize * 3, 4, WHITE);
     }
 
     // Draw X and O
@@ -72,35 +80,35 @@ function drawGrid() {
 
         if (board[idx] === 1) {
             // Draw X
-            System.drawLine(cx - 15, cy - 15, cx + 15, cy + 15, BLUE);
-            System.drawLine(cx - 15, cy + 15, cx + 15, cy - 15, BLUE);
+            Display.drawLine(cx - 15, cy - 15, cx + 15, cy + 15, BLUE);
+            Display.drawLine(cx - 15, cy + 15, cx + 15, cy - 15, BLUE);
             // Thicken X
-            System.drawLine(cx - 14, cy - 15, cx + 16, cy + 15, BLUE);
-            System.drawLine(cx - 14, cy + 15, cx + 16, cy - 15, BLUE);
+            Display.drawLine(cx - 14, cy - 15, cx + 16, cy + 15, BLUE);
+            Display.drawLine(cx - 14, cy + 15, cx + 16, cy - 15, BLUE);
         } else if (board[idx] === 2) {
             // Draw O
-            System.drawCircle(cx, cy, 18, RED);
-            System.drawCircle(cx, cy, 17, RED);
+            Display.drawCircle(cx, cy, 18, RED);
+            Display.drawCircle(cx, cy, 17, RED);
         }
     }
 }
 
 function drawGameOver() {
-    System.fillRect(20, 100, 200, 120, DARKGREY);
-    System.drawRect(20, 100, 200, 120, WHITE);
+    Display.fillRect(20, 100, 200, 120, DARKGREY);
+    Display.drawRect(20, 100, 200, 120, WHITE);
     
-    System.setTextColor(WHITE, DARKGREY);
+    Display.setTextColor(WHITE, DARKGREY);
     if (winner === 1) {
-        System.drawString("YOU WIN!", 70, 120, 4);
+        Display.drawString("YOU WIN!", 70, 120, 4);
     } else if (winner === 2) {
-        System.drawString("BOT WINS!", 65, 120, 4);
+        Display.drawString("BOT WINS!", 65, 120, 4);
     } else {
-        System.drawString("DRAW!", 90, 120, 4);
+        Display.drawString("DRAW!", 90, 120, 4);
     }
     
-    System.fillRoundRect(60, 160, 120, 40, 5, GREEN);
-    System.setTextColor(BLACK, GREEN);
-    System.drawString("AGAIN", 90, 170, 4);
+    Display.fillRoundRect(60, 160, 120, 40, 5, GREEN);
+    Display.setTextColor(BLACK, GREEN);
+    Display.drawString("AGAIN", 90, 170, 4);
 }
 
 var WINS = [
@@ -126,7 +134,7 @@ function checkWinner() {
 
 function minimax(b, depth, isMaximizing) {
     // Pet the watchdog occasionally on deep branches
-    if (depth === 1) System.delay(1);
+    if (depth === 1) Harix.delay(1);
     
     var result = checkWinnerState(b);
     if (result === 2) return 10 - depth; // Bot wins
@@ -162,7 +170,7 @@ function minimax(b, depth, isMaximizing) {
 }
 
 function botMove() {
-    System.delay(200); // Fake thinking delay
+    Harix.delay(200); // Fake thinking delay
     
     var emptySpots = [];
     for (var e=0; e<9; e++) {
@@ -230,21 +238,32 @@ function resetGame() {
 drawMenu();
 
 while (true) {
-    var t = System.getTouch();
+    var t = Input.getTouch();
+    
+    // Check for exit (top-right corner)
+    if (t.touched && t.x >= SW - 40 && t.y <= 40) {
+        break;
+    }
+    
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
     
     // Wait for touch release logic
-    if (t.touched && t.x < 200) { // Avoid top right OS close button
+    if (t.touched && t.x < SW - 40) { // Avoid OS close button area
         if (state === STATE_MENU) {
             // CHANGE Difficulty
             if (t.x >= 20 && t.x <= 110 && t.y >= 140 && t.y <= 180) {
                 difficulty = (difficulty + 1) % 4;
                 drawMenu();
-                System.delay(300); // Debounce
+                Harix.delay(300); // Debounce
             }
             // PLAY GAME
             else if (t.x >= 130 && t.x <= 220 && t.y >= 140 && t.y <= 180) {
                 resetGame();
-                System.delay(300); // Debounce
+                Harix.delay(300); // Debounce
             }
         } 
         else if (state === STATE_PLAYING && turn === 1) {
@@ -270,14 +289,14 @@ while (true) {
                         turn = 2; // Bot turn
                         drawGrid();
                     }
-                    System.delay(300); // Debounce
+                    Harix.delay(300); // Debounce
                 }
             }
         }
         else if (state === STATE_GAMEOVER) {
             if (t.x >= 60 && t.x <= 180 && t.y >= 160 && t.y <= 200) {
                 resetGame();
-                System.delay(300); // Debounce
+                Harix.delay(300); // Debounce
             }
         }
     }
@@ -286,5 +305,8 @@ while (true) {
         botMove();
     }
     
-    System.delay(10);
+    Harix.delay(10);
 }
+
+// Cleanup
+Display.fillScreen(BLACK);

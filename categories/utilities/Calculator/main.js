@@ -1,8 +1,8 @@
 // HarixOS Custom JS Calculator
 // High-performance Android-style touch calculator
 
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 var expression = "";
 var result = "";
@@ -50,11 +50,11 @@ var startX = 12;
 var startY = 100;
 
 function drawUI() {
-    System.fillScreen(BG_COLOR);
+    Display.fillScreen(BG_COLOR);
     
     // Display Screen Area
-    System.fillRoundRect(10, 10, SW - 20, 80, 5, 0x0000); // Black screen
-    System.drawRoundRect(10, 10, SW - 20, 80, 5, 0x7BEF); // Border
+    Display.fillRoundRect(10, 10, SW - 20, 80, 5, 0x0000); // Black screen
+    Display.drawRoundRect(10, 10, SW - 20, 80, 5, 0x7BEF); // Border
     
     drawDisplay();
 
@@ -69,39 +69,39 @@ function drawUI() {
         if (b.type === "clear" || b.type === "del") color = BTN_CLEAR;
         if (b.type === "eq") color = BTN_EQUAL;
         
-        System.fillRoundRect(bx, by, btnW, btnH, 8, color);
+        Display.fillRoundRect(bx, by, btnW, btnH, 8, color);
         
         // Center text roughly
         var tx = bx + (btnW / 2);
         var ty = by + 12;
         if (b.l === "DEL") {
             tx -= 15;
-            System.setTextColor(TEXT_COLOR, color);
-            System.drawString(b.l, tx, ty, 2);
+            Display.setTextColor(TEXT_COLOR, color);
+            Display.drawString(b.l, tx, ty, 2);
         } else {
             tx -= 8;
-            System.setTextColor(TEXT_COLOR, color);
-            System.drawString(b.l, tx, ty, 4);
+            Display.setTextColor(TEXT_COLOR, color);
+            Display.drawString(b.l, tx, ty, 4);
         }
     }
 }
 
 function drawDisplay() {
     // Clear display area
-    System.fillRoundRect(12, 12, SW - 24, 76, 5, 0x0000);
+    Display.fillRoundRect(12, 12, SW - 24, 76, 5, 0x0000);
     
-    System.setTextColor(TEXT_COLOR, 0x0000);
+    Display.setTextColor(TEXT_COLOR, 0x0000);
     
     // Expression
     if (expression.length > 15) {
-        System.drawString(expression.substring(expression.length - 15), 18, 20, 4);
+        Display.drawString(expression.substring(expression.length - 15), 18, 20, 4);
     } else {
-        System.drawString(expression, 18, 20, 4);
+        Display.drawString(expression, 18, 20, 4);
     }
     
     // Result
-    System.setTextColor(0x7BEF, 0x0000); // Light blue for result
-    System.drawString(result, 18, 55, 4);
+    Display.setTextColor(0x7BEF, 0x0000); // Light blue for result
+    Display.drawString(result, 18, 55, 4);
 }
 
 function handleButton(b) {
@@ -132,10 +132,22 @@ function handleButton(b) {
 drawUI();
 
 while (true) {
-    var t = System.getTouch();
+    var t = Input.getTouch();
+    
+    // Check for exit condition (top-right corner)
+    if (t.touched && t.x >= SW - 40 && t.y <= 40) {
+        break;
+    }
+    
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+    
     var isTapped = t.touched && !lastTouch;
     
-    if (isTapped && t.y >= startY) {
+    if (isTapped && t.y >= startY && t.x < SW - 40) { // Avoid OS close button area
         // Calculate which button was pressed
         for (var i = 0; i < buttons.length; i++) {
             var b = buttons[i];
@@ -144,9 +156,9 @@ while (true) {
             
             if (t.x >= bx && t.x <= bx + btnW && t.y >= by && t.y <= by + btnH) {
                 // Button Press Animation
-                System.drawRoundRect(bx, by, btnW, btnH, 8, TEXT_COLOR);
-                System.delay(50);
-                System.drawRoundRect(bx, by, btnW, btnH, 8, BG_COLOR); // remove highlight
+                Display.drawRoundRect(bx, by, btnW, btnH, 8, TEXT_COLOR);
+                Harix.delay(50);
+                Display.drawRoundRect(bx, by, btnW, btnH, 8, BG_COLOR); // remove highlight
                 
                 handleButton(b);
                 break;
@@ -155,5 +167,8 @@ while (true) {
     }
     
     lastTouch = t.touched;
-    System.delay(15);
+    Harix.delay(15);
 }
+
+// Cleanup
+Display.fillScreen(BG_COLOR);

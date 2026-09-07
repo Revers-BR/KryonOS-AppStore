@@ -1,12 +1,23 @@
 // KryonOS 3D Cube Engine
 // A 3D wireframe renderer in JavaScript
 
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 var STATE_MENU = 0;
 var STATE_PLAYING = 1;
 var state = STATE_MENU;
+
+// Colors
+var BLACK = 0x0000;
+var WHITE = 0xFFFF;
+var RED = 0xF800;
+var GREEN = 0x07E0;
+var BLUE = 0x001F;
+var YELLOW = 0xFFE0;
+var MAGENTA = 0xF81F;
+var CYAN = 0x07FF;
+var DARKGREY = 0x7BEF;
 
 // 3D Cube Vertices (x, y, z)
 var vertices = [
@@ -14,7 +25,7 @@ var vertices = [
     [-1, -1, 1], [1, -1, 1], [1, 1, 1], [-1, 1, 1]
 ];
 
-// Faces definition with distinct colors for a solid color cube (matching benchmark)
+// Faces definition with distinct colors for a solid color cube
 var faces = [
     { indices: [0, 1, 2, 3], color: RED },     // Front (Red)
     { indices: [5, 4, 7, 6], color: GREEN },   // Back (Green)
@@ -33,25 +44,25 @@ var lastTouchY = 0;
 var isDragging = false;
 
 function drawMenu() {
-    System.fillScreen(BLACK);
+    Display.fillScreen(BLACK);
 
     // Draw decorative 3D-ish borders
-    System.drawRect(10, 10, SW - 20, SH - 20, CYAN);
-    System.drawRect(12, 12, SW - 24, SH - 24, BLUE);
+    Display.drawRect(10, 10, SW - 20, SH - 20, CYAN);
+    Display.drawRect(12, 12, SW - 24, SH - 24, BLUE);
 
-    System.setTextColor(GREEN, BLACK);
-    System.drawString("3D Cube", 55, 60, 4);
+    Display.setTextColor(GREEN, BLACK);
+    Display.drawString("3D Cube", 55, 60, 4);
 
-    System.setTextColor(WHITE, BLACK);
-    System.drawString("Interactive Renderer", 35, 100, 2);
+    Display.setTextColor(WHITE, BLACK);
+    Display.drawString("Interactive Renderer", 35, 100, 2);
 
-    System.fillRoundRect(50, 180, 140, 50, 8, RED);
-    System.drawRoundRect(50, 180, 140, 50, 8, WHITE);
-    System.setTextColor(WHITE, RED);
-    System.drawString("START", 85, 195, 4);
+    Display.fillRoundRect(50, 180, 140, 50, 8, RED);
+    Display.drawRoundRect(50, 180, 140, 50, 8, WHITE);
+    Display.setTextColor(WHITE, RED);
+    Display.drawString("START", 85, 195, 4);
 
-    System.setTextColor(DARKGREY, BLACK);
-    System.drawString("Drag finger to rotate", 45, 270, 2);
+    Display.setTextColor(DARKGREY, BLACK);
+    Display.drawString("Drag finger to rotate", 45, 270, 2);
 }
 
 function draw3DFrame() {
@@ -102,20 +113,20 @@ function draw3DFrame() {
     // Sort faces so furthest are drawn first (Painter's Algorithm: descending depth order)
     processedFaces.sort(function (a, b) { return b.z - a.z; });
 
-    var sliceH = 32; // 10 slices of 32px (safely fits in 16-bit RAM)
+    var sliceH = 32; // Slices of 32px (safely fits in RAM)
     var numSlices = Math.ceil(SH / sliceH);
 
-    System.createSprite(SW, sliceH);
+    Sprite.create(SW, sliceH);
     for (var slice = 0; slice < numSlices; slice++) {
         var sliceY = slice * sliceH;
-        System.bindSprite(true);
-        System.fillScreen(BLACK);
+        Sprite.bind(true);
+        Display.fillScreen(BLACK);
 
         // Title bar overlay
         if (slice === 0) {
-            System.fillRect(0, 0, SW, 30, DARKGREY);
-            System.setTextColor(CYAN, DARKGREY);
-            System.drawString("3D Cube", 10, 8, 2);
+            Display.fillRect(0, 0, SW, 30, DARKGREY);
+            Display.setTextColor(CYAN, DARKGREY);
+            Display.drawString("3D Cube", 10, 8, 2);
         }
 
         // Draw all faces (sorted back-to-front)
@@ -127,27 +138,32 @@ function draw3DFrame() {
             var maxY = Math.max(f.p0.py, f.p1.py, f.p2.py, f.p3.py);
             if (maxY >= sliceY && minY < sliceY + sliceH) {
                 // Draw filled triangles for the solid face
-                System.fillTriangle(f.p0.px, f.p0.py - sliceY, f.p1.px, f.p1.py - sliceY, f.p2.px, f.p2.py - sliceY, f.color);
-                System.fillTriangle(f.p0.px, f.p0.py - sliceY, f.p2.px, f.p2.py - sliceY, f.p3.px, f.p3.py - sliceY, f.color);
+                Display.fillTriangle(f.p0.px, f.p0.py - sliceY, f.p1.px, f.p1.py - sliceY, f.p2.px, f.p2.py - sliceY, f.color);
+                Display.fillTriangle(f.p0.px, f.p0.py - sliceY, f.p2.px, f.p2.py - sliceY, f.p3.px, f.p3.py - sliceY, f.color);
             }
         }
 
-        System.bindSprite(false);
-        System.pushSprite(0, sliceY);
+        Sprite.bind(false);
+        Sprite.push(0, sliceY);
     }
-    System.deleteSprite();
+    Sprite.delete();
 }
 
 drawMenu();
 
 while (true) {
-    var t = System.getTouch();
+    var t = Input.getTouch();
 
-    if (t.touched && t.x < 200) { // Avoid OS close button
+    // Check for exit condition (top-right corner)
+    if (t.touched && t.x >= SW - 40 && t.y <= 40) {
+        break;
+    }
+
+    if (t.touched && t.x < SW - 40) { // Avoid OS close button area
         if (state === STATE_MENU) {
             if (t.x >= 50 && t.x <= 190 && t.y >= 180 && t.y <= 230) {
                 state = STATE_PLAYING;
-                System.delay(200); // Debounce
+                Harix.delay(200); // Debounce
             }
         }
         else if (state === STATE_PLAYING) {
@@ -174,6 +190,12 @@ while (true) {
         isDragging = false;
     }
 
+    // Check for ESC key exit
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+
     if (state === STATE_PLAYING) {
         // Auto rotate if not dragging
         if (!isDragging) {
@@ -194,6 +216,9 @@ while (true) {
         draw3DFrame();
     }
 
-    // High FPS yield. GC triggers occasionally here from our C++ fixes.
-    System.delay(10);
+    // High FPS yield with GC opportunity
+    Harix.delay(10);
 }
+
+// Cleanup
+Display.fillScreen(BLACK);

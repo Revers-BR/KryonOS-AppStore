@@ -1,8 +1,8 @@
 // HarixOS Advanced File Manager
-// A professional, full-featured JS file manager using the expanded FS API
+// A professional, full-featured JS file manager using the expanded FileSystem API
 
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 // Application State
 var STATE_LIST = 0;
@@ -16,7 +16,7 @@ var maxDisplay = 6;
 var lastTouch = false;
 
 var selectedFile = "";
-var isDirCache = {}; // Cache to prevent excessive FS calls while drawing
+var isDirCache = {}; // Cache to prevent excessive FileSystem calls while drawing
 
 // Colors
 var C_BG = 0x0000;
@@ -31,13 +31,13 @@ var C_BTN = 0xFA20; // Orange buttons
 var C_DEL = 0xF800; // Red
 
 function loadFiles() {
-    files = FS.listDir(currentPath) || [];
+    files = FileSystem.listDir(currentPath) || [];
     scrollIndex = 0;
     
     // Pre-cache types so drawing loop is fast
     isDirCache = {};
     for (var i = 0; i < files.length; i++) {
-        isDirCache[files[i]] = FS.isDirectory(files[i]);
+        isDirCache[files[i]] = FileSystem.isDirectory(files[i]);
     }
 }
 
@@ -65,31 +65,31 @@ function formatSize(bytes) {
 }
 
 function drawListUI() {
-    System.fillScreen(C_BG);
+    Display.fillScreen(C_BG);
     
     // Top Bar
-    System.fillRoundRect(0, 0, SW, 40, 0, C_TOP);
-    System.setTextColor(C_TEXT, C_TOP);
+    Display.fillRoundRect(0, 0, SW, 40, 0, C_TOP);
+    Display.setTextColor(C_TEXT, C_TOP);
     
     var dispPath = currentPath;
     if (dispPath.length > 20) dispPath = ".." + dispPath.substring(dispPath.length - 18);
-    System.drawString(dispPath, 45, 12, 2);
+    Display.drawString(dispPath, 45, 12, 2);
     
     // UP Button
-    System.fillRoundRect(5, 5, 30, 30, 4, 0x52AA);
-    System.setTextColor(C_TEXT, 0x52AA);
-    System.drawString("UP", 10, 12, 2);
+    Display.fillRoundRect(5, 5, 30, 30, 4, 0x52AA);
+    Display.setTextColor(C_TEXT, 0x52AA);
+    Display.drawString("UP", 10, 12, 2);
     
     // New Folder Button
-    System.fillRoundRect(SW - 40, 5, 35, 30, 4, 0x07E0);
-    System.setTextColor(C_BG, 0x07E0);
-    System.drawString("+D", SW - 32, 12, 2);
+    Display.fillRoundRect(SW - 40, 5, 35, 30, 4, 0x07E0);
+    Display.setTextColor(C_BG, 0x07E0);
+    Display.drawString("+D", SW - 32, 12, 2);
     
     // File List
     var y = 45;
     if (files.length === 0) {
-        System.setTextColor(C_TEXT, C_BG);
-        System.drawString("Empty Directory", 15, 60, 2);
+        Display.setTextColor(C_TEXT, C_BG);
+        Display.drawString("Empty Directory", 15, 60, 2);
     } else {
         var end = scrollIndex + maxDisplay;
         if (end > files.length) end = files.length;
@@ -102,17 +102,17 @@ function drawListUI() {
             
             var isDir = isDirCache[fullPath];
             
-            System.fillRoundRect(5, y, SW - 10, 35, 4, C_ITEM);
+            Display.fillRoundRect(5, y, SW - 10, 35, 4, C_ITEM);
             
             if (isDir) {
-                System.fillRoundRect(10, y + 8, 20, 18, 3, C_DIR);
-                System.setTextColor(C_TEXT, C_ITEM);
-                System.drawString(fName.substring(0,16), 40, y + 10, 2);
-                System.drawString("<DIR>", SW - 50, y + 10, 2);
+                Display.fillRoundRect(10, y + 8, 20, 18, 3, C_DIR);
+                Display.setTextColor(C_TEXT, C_ITEM);
+                Display.drawString(fName.substring(0,16), 40, y + 10, 2);
+                Display.drawString("<DIR>", SW - 50, y + 10, 2);
             } else {
-                System.fillRoundRect(10, y + 8, 16, 20, 2, C_FILE);
-                System.setTextColor(C_TEXT, C_ITEM);
-                System.drawString(fName.substring(0,18), 35, y + 10, 2);
+                Display.fillRoundRect(10, y + 8, 16, 20, 2, C_FILE);
+                Display.setTextColor(C_TEXT, C_ITEM);
+                Display.drawString(fName.substring(0,18), 35, y + 10, 2);
             }
             
             y += 40;
@@ -120,70 +120,82 @@ function drawListUI() {
     }
     
     // Bottom Bar
-    System.fillRoundRect(0, SH - 40, SW, 40, 0, C_BOT);
+    Display.fillRoundRect(0, SH - 40, SW, 40, 0, C_BOT);
     
     // Storage Space
     var driveBase = (currentPath.indexOf("/sd") === 0) ? "/sd" : "/local";
-    var free = FS.getFreeSpace(driveBase);
-    var total = FS.getTotalSpace(driveBase);
+    var free = FileSystem.getFreeSpace(driveBase);
+    var total = FileSystem.getTotalSpace(driveBase);
     var usedPct = total > 0 ? Math.floor(((total - free) / total) * 100) : 0;
     
-    System.setTextColor(C_TEXT, C_BOT);
-    System.drawString(driveBase + ": " + usedPct + "% full", 5, SH - 30, 2);
+    Display.setTextColor(C_TEXT, C_BOT);
+    Display.drawString(driveBase + ": " + usedPct + "% full", 5, SH - 30, 2);
     
     // Swap Drive
-    System.fillRoundRect(SW - 60, SH - 35, 55, 30, 4, C_BTN);
-    System.drawString("SWAP", SW - 48, SH - 28, 2);
+    Display.fillRoundRect(SW - 60, SH - 35, 55, 30, 4, C_BTN);
+    Display.drawString("SWAP", SW - 48, SH - 28, 2);
     
     // Pagination
     if (scrollIndex > 0) {
-        System.fillRoundRect(SW - 110, SH - 35, 40, 30, 4, 0x52AA);
-        System.drawString("<", SW - 95, SH - 28, 2);
+        Display.fillRoundRect(SW - 110, SH - 35, 40, 30, 4, 0x52AA);
+        Display.drawString("<", SW - 95, SH - 28, 2);
     }
     if (scrollIndex + maxDisplay < files.length) {
-        System.fillRoundRect(SW - 160, SH - 35, 40, 30, 4, 0x52AA);
-        System.drawString(">", SW - 145, SH - 28, 2);
+        Display.fillRoundRect(SW - 160, SH - 35, 40, 30, 4, 0x52AA);
+        Display.drawString(">", SW - 145, SH - 28, 2);
     }
 }
 
 function drawModal() {
-    System.fillRoundRect(20, 50, SW - 40, 220, 8, C_MODAL);
-    System.drawRoundRect(20, 50, SW - 40, 220, 8, C_TEXT);
+    Display.fillRoundRect(20, 50, SW - 40, 220, 8, C_MODAL);
+    Display.drawRoundRect(20, 50, SW - 40, 220, 8, C_TEXT);
     
     var fName = selectedFile;
     var lastSlash = fName.lastIndexOf("/");
     if (lastSlash >= 0) fName = fName.substring(lastSlash + 1);
     
-    System.setTextColor(C_TEXT, C_MODAL);
-    System.drawString(fName.substring(0, 16), 30, 60, 4);
+    Display.setTextColor(C_TEXT, C_MODAL);
+    Display.drawString(fName.substring(0, 16), 30, 60, 4);
     
-    var size = FS.getFileSize(selectedFile);
-    System.drawString("Size: " + formatSize(size), 30, 90, 2);
+    var size = FileSystem.getFileSize(selectedFile);
+    Display.drawString("Size: " + formatSize(size), 30, 90, 2);
     
     // Buttons
-    System.fillRoundRect(30, 120, 85, 35, 4, C_BTN);
-    System.drawString("RENAME", 45, 130, 2);
+    Display.fillRoundRect(30, 120, 85, 35, 4, C_BTN);
+    Display.drawString("RENAME", 45, 130, 2);
     
-    System.fillRoundRect(125, 120, 85, 35, 4, 0x52AA);
-    System.drawString("HASH", 150, 130, 2);
+    Display.fillRoundRect(125, 120, 85, 35, 4, 0x52AA);
+    Display.drawString("HASH", 150, 130, 2);
     
-    System.fillRoundRect(30, 165, 180, 35, 4, C_DEL);
-    System.setTextColor(C_TEXT, C_DEL);
-    System.drawString("DELETE PERMANENTLY", 45, 175, 2);
+    Display.fillRoundRect(30, 165, 180, 35, 4, C_DEL);
+    Display.setTextColor(C_TEXT, C_DEL);
+    Display.drawString("DELETE PERMANENTLY", 45, 175, 2);
     
-    System.fillRoundRect(30, 215, 180, 35, 4, C_BG);
-    System.setTextColor(C_TEXT, C_BG);
-    System.drawString("CANCEL", 95, 225, 2);
+    Display.fillRoundRect(30, 215, 180, 35, 4, C_BG);
+    Display.setTextColor(C_TEXT, C_BG);
+    Display.drawString("CANCEL", 95, 225, 2);
 }
 
 loadFiles();
 drawListUI();
 
 while (true) {
-    var t = System.getTouch();
+    var t = Input.getTouch();
+    
+    // Check for exit condition (top-right corner)
+    if (t.touched && t.x >= SW - 40 && t.y <= 40) {
+        break;
+    }
+    
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+    
     var isTapped = t.touched && !lastTouch;
     
-    if (isTapped) {
+    if (isTapped && t.x < SW - 40) { // Avoid OS close button area
         if (state === STATE_LIST) {
             // UP Button
             if (t.x <= 35 && t.y <= 35) {
@@ -192,9 +204,9 @@ while (true) {
             }
             // MKDIR Button
             else if (t.x >= SW - 40 && t.y <= 35) {
-                var dName = System.prompt("New Folder Name:", "");
+                var dName = Keyboard.prompt("New Folder Name:", "");
                 if (dName && dName.length > 0) {
-                    FS.mkdir(currentPath + "/" + dName);
+                    FileSystem.mkdir(currentPath + "/" + dName);
                     loadFiles();
                 }
                 drawListUI();
@@ -204,7 +216,7 @@ while (true) {
                 if (currentPath.indexOf("/local") === 0) {
                     currentPath = "/sd";
                     // Attempt mount silently just in case
-                    FS.mountSD();
+                    FileSystem.mountSD();
                 } else {
                     currentPath = "/local";
                 }
@@ -250,11 +262,11 @@ while (true) {
         else if (state === STATE_POPUP) {
             // RENAME
             if (t.x >= 30 && t.x <= 115 && t.y >= 120 && t.y <= 155) {
-                var newName = System.prompt("New name for file:", "");
+                var newName = Keyboard.prompt("New name for file:", "");
                 if (newName && newName.length > 0) {
                     var slash = selectedFile.lastIndexOf("/");
                     var newPath = selectedFile.substring(0, slash + 1) + newName;
-                    FS.renameFile(selectedFile, newPath);
+                    FileSystem.renameFile(selectedFile, newPath);
                     loadFiles();
                 }
                 state = STATE_LIST;
@@ -262,16 +274,16 @@ while (true) {
             }
             // HASH
             else if (t.x >= 125 && t.x <= 210 && t.y >= 120 && t.y <= 155) {
-                var md5 = FS.getFileMD5(selectedFile);
-                System.prompt("MD5 Hash:", md5); // Use prompt to display text
+                var md5 = FileSystem.getFileMD5(selectedFile);
+                Keyboard.prompt("MD5 Hash:", md5); // Use prompt to display text
                 state = STATE_LIST;
                 drawListUI();
             }
             // DELETE
             else if (t.x >= 30 && t.x <= 210 && t.y >= 165 && t.y <= 200) {
-                var conf = System.prompt("Type YES to delete", "");
+                var conf = Keyboard.prompt("Type YES to delete", "");
                 if (conf === "YES") {
-                    FS.deleteFile(selectedFile);
+                    FileSystem.deleteFile(selectedFile);
                     loadFiles();
                 }
                 state = STATE_LIST;
@@ -286,5 +298,8 @@ while (true) {
     }
     
     lastTouch = t.touched;
-    System.delay(20);
+    Harix.delay(20);
 }
+
+// Cleanup
+Display.fillScreen(C_BG);

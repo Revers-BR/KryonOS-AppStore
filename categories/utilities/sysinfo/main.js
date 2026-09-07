@@ -1,22 +1,22 @@
-const C_BG = 0x0000;
-const C_TEXT = 0xFFFF;
-const C_ACCENT = 0x07E0; // Green
+var C_BG = 0x0000;
+var C_TEXT = 0xFFFF;
+var C_ACCENT = 0x07E0; // Green
 
-System.fillScreen(C_BG);
-System.setTextColor(C_TEXT, C_BG);
-System.drawString("System Information", 10, 10, 2);
-System.drawLine(10, 30, 230, 30, C_ACCENT);
+Display.fillScreen(C_BG);
+Display.setTextColor(C_TEXT, C_BG);
+Display.drawString("System Information", 10, 10, 2);
+Display.drawLine(10, 30, 230, 30, C_ACCENT);
 
-var info = System.getInfo();
+var info = Harix.getInfo();
 
 var y = 45;
 var spacing = 20;
 
 function drawRow(label, value) {
-    System.setTextColor(C_ACCENT, C_BG);
-    System.drawString(label + ":", 10, y, 2);
-    System.setTextColor(C_TEXT, C_BG);
-    System.drawString(value, 110, y, 2);
+    Display.setTextColor(C_ACCENT, C_BG);
+    Display.drawString(label + ":", 10, y, 2);
+    Display.setTextColor(C_TEXT, C_BG);
+    Display.drawString(value, 110, y, 2);
     y += spacing;
 }
 
@@ -34,8 +34,26 @@ drawRow("Uptime", (info.uptimeMs / 1000).toFixed(1) + " sec");
 
 // Wait for touch to exit
 while (true) {
-    var touch = System.getTouch();
-    if (touch.touched) {
+    var touch = Input.getTouch();
+    
+    // Check for exit condition (top-right corner)
+    if (touch.touched && touch.x >= Display.screenWidth() - 40 && touch.y <= 40) {
         break;
     }
+    
+    // Check for ESC key
+    var key = Input.getKey();
+    if (key === "ESC") {
+        break;
+    }
+    
+    // Check for any touch to exit (as originally intended)
+    if (touch.touched && touch.x < Display.screenWidth() - 40) {
+        break;
+    }
+    
+    Harix.delay(10);
 }
+
+// Cleanup
+Display.fillScreen(C_BG);

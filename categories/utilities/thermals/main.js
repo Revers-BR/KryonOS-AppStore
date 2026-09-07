@@ -1,8 +1,8 @@
 // HarixOS Hardware Thermals Monitor
 // Displays real-time ESP32 internal CPU core temperature
 
-var SW = System.screenWidth();
-var SH = System.screenHeight();
+var SW = Display.screenWidth();
+var SH = Display.screenHeight();
 
 // UI Colors
 var C_BG = 0x0000;       // Black
@@ -19,54 +19,83 @@ function mapColor(tempC) {
 }
 
 // Initial Sensor Check
-var hasSensor = System.hasTemperatureSensor();
+var hasSensor = Harix.hasTemperatureSensor();
 
 if (!hasSensor) {
-    System.fillScreen(C_BG);
-    System.setTextColor(C_RED, C_BG);
-    System.drawString("UNSUPPORTED", 40, 50, 4);
+    Display.fillScreen(C_BG);
+    Display.setTextColor(C_RED, C_BG);
+    Display.drawString("UNSUPPORTED", 40, 50, 4);
     
-    System.setTextColor(C_TEXT, C_BG);
-    System.drawString("This specific ESP32 chip", 10, 100, 2);
-    System.drawString("revision does not have", 10, 120, 2);
-    System.drawString("a physical thermal sensor.", 10, 140, 2);
+    Display.setTextColor(C_TEXT, C_BG);
+    Display.drawString("This specific ESP32 chip", 10, 100, 2);
+    Display.drawString("revision does not have", 10, 120, 2);
+    Display.drawString("a physical thermal sensor.", 10, 140, 2);
     
-    System.drawString("Tap to exit...", 60, 200, 2);
+    Display.drawString("Tap to exit...", 60, 200, 2);
     
     while (true) {
-        if (System.getTouch().touched) break;
-        System.delay(50);
+        var touch = Input.getTouch();
+        
+        // Check for exit condition (top-right corner)
+        if (touch.touched && touch.x >= SW - 40 && touch.y <= 40) {
+            break;
+        }
+        
+        // Check for ESC key
+        var key = Input.getKey();
+        if (key === "ESC") {
+            break;
+        }
+        
+        // Check for any touch to exit
+        if (touch.touched && touch.x < SW - 40) {
+            break;
+        }
+        
+        Harix.delay(50);
     }
 } else {
     // Sensor Supported - Run App
-    System.fillScreen(C_BG);
+    Display.fillScreen(C_BG);
     
     // Header
-    System.setTextColor(0x07FF, C_BG); // Cyan
-    System.drawString("THERMAL MONITOR", 20, 20, 4);
+    Display.setTextColor(0x07FF, C_BG); // Cyan
+    Display.drawString("THERMAL MONITOR", 20, 20, 4);
     
     // Draw Thermometer Outline
-    System.drawRoundRect(90, 80, 60, 160, 10, C_GREY);
-    System.fillCircle(120, 240, 40, C_GREY); // Bulb outline
-    System.fillCircle(120, 240, 36, C_BG);   // Bulb inner
-    System.fillRect(92, 230, 56, 15, C_BG);  // Connect pipe to bulb
+    Display.drawRoundRect(90, 80, 60, 160, 10, C_GREY);
+    Display.fillCircle(120, 240, 40, C_GREY); // Bulb outline
+    Display.fillCircle(120, 240, 36, C_BG);   // Bulb inner
+    Display.fillRect(92, 230, 56, 15, C_BG);  // Connect pipe to bulb
     
     var maxTemp = -999;
     var lastUpdate = 0;
     
     while (true) {
-        var now = System.millis();
+        var now = Harix.millis();
+        
+        // Check for exit condition (top-right corner)
+        var touchExit = Input.getTouch();
+        if (touchExit.touched && touchExit.x >= SW - 40 && touchExit.y <= 40) {
+            break;
+        }
+        
+        // Check for ESC key
+        var keyExit = Input.getKey();
+        if (keyExit === "ESC") {
+            break;
+        }
         
         // Update display every 500ms
         if (now - lastUpdate > 500) {
-            var temp = System.getTemperature();
+            var temp = Harix.getTemperature();
             
             if (temp > maxTemp) maxTemp = temp;
             
             var tColor = mapColor(temp);
             
             // Draw Bulb
-            System.fillCircle(120, 240, 34, tColor);
+            Display.fillCircle(120, 240, 34, tColor);
             
             // Map temperature (0C to 80C) to bar height (0 to 140 pixels)
             var barHeight = Math.floor((temp / 80.0) * 140);
@@ -74,32 +103,29 @@ if (!hasSensor) {
             if (barHeight > 140) barHeight = 140;
             
             // Clear pipe
-            System.fillRect(95, 85, 50, 140, C_BG);
+            Display.fillRect(95, 85, 50, 140, C_BG);
             
             // Fill pipe
-            System.fillRect(95, 225 - barHeight, 50, barHeight, tColor);
+            Display.fillRect(95, 225 - barHeight, 50, barHeight, tColor);
             
             // Display numbers
-            System.setTextColor(tColor, C_BG);
+            Display.setTextColor(tColor, C_BG);
             // Quick hack to clear previous text by overwriting with spaces or drawing a black box
-            System.fillRect(10, 280, 220, 30, C_BG); 
-            System.drawString("Core: " + Math.floor(temp) + " C", 20, 280, 4);
+            Display.fillRect(10, 280, 220, 30, C_BG); 
+            Display.drawString("Core: " + Math.floor(temp) + " C", 20, 280, 4);
             
-            System.setTextColor(C_TEXT, C_BG);
-            System.fillRect(160, 120, 70, 40, C_BG);
-            System.drawString("MAX", 170, 120, 2);
-            System.setTextColor(C_RED, C_BG);
-            System.drawString(Math.floor(maxTemp) + " C", 170, 140, 2);
+            Display.setTextColor(C_TEXT, C_BG);
+            Display.fillRect(160, 120, 70, 40, C_BG);
+            Display.drawString("MAX", 170, 120, 2);
+            Display.setTextColor(C_RED, C_BG);
+            Display.drawString(Math.floor(maxTemp) + " C", 170, 140, 2);
             
             lastUpdate = now;
         }
         
-        var t = System.getTouch();
-        if (t.touched) {
-            // Give them a way out if they tap the top right X (handled by Kernel)
-            // Or if they tap anywhere on the screen
-        }
-        
-        System.delay(20);
+        Harix.delay(20);
     }
 }
+
+// Cleanup
+Display.fillScreen(C_BG);
