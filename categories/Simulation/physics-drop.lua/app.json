@@ -1,0 +1,12 @@
+{
+  "name": "Physics Drop Lua",
+  "packageName": "com.kryonos.physicsdrop.lua",
+  "version": "1.0.0",
+  "metaUrl": "https://raw.githubusercontent.com/Revers-BR/KryonOS-AppStore/refs/heads/main/categories/Simulation/physics-drop.lua/app.json",
+  "author": "KryonOS Team",
+  "description": "A Verlet physics sandbox. Draw lines and watch them fall!",
+  "type": "Demo",
+  "category": "Simulation",
+  "api": 2,
+  "changelog": "Initial release."
+}

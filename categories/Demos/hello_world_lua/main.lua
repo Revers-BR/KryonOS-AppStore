@@ -6,22 +6,22 @@
 --   • Toque no X no canto superior direito
 --   • Tecla ESC
 
-local width = System.screenWidth()
-local height = System.screenHeight()
+local width = Display.screenWidth()
+local height = Display.screenHeight()
 
 local BLUE = 0x001F
 local WHITE = 0xFFFF
 local RED = 0xF800
 
 -- Limpa a tela
-System.fillScreen(BLUE)
+Display.fillScreen(BLUE)
 
 -- Configuração do texto
-System.setTextColor(WHITE, BLUE)
-System.setTextSize(1)
+Display.setTextColor(WHITE, BLUE)
+Display.setTextSize(1)
 
 -- Título
-System.drawString(
+Display.drawString(
     "Hello from KryonOS Lua!",
     10,
     15
@@ -31,19 +31,19 @@ System.drawString(
 if height >= 200 then
 
     -- Tela 240x320
-    System.drawString(
+    Display.drawString(
         "Lua is working!",
         10,
         50
     )
 
-    System.drawString(
+    Display.drawString(
         "This is running natively",
         10,
         80
     )
 
-    System.drawString(
+    Display.drawString(
         "on your ESP32!",
         10,
         110
@@ -52,13 +52,13 @@ if height >= 200 then
 else
 
     -- Tela 240x135
-    System.drawString(
+    Display.drawString(
         "Lua is working!",
         10,
         45
     )
 
-    System.drawString(
+    Display.drawString(
         "Running natively on ESP32",
         10,
         70
@@ -72,7 +72,7 @@ local exitY = 5
 local exitW = 40
 local exitH = 25
 
-System.fillRoundRect(
+Display.fillRoundRect(
     exitX,
     exitY,
     exitW,
@@ -81,16 +81,16 @@ System.fillRoundRect(
     RED
 )
 
-System.setTextColor(WHITE, RED)
+Display.setTextColor(WHITE, RED)
 
-System.drawString(
+Display.drawString(
     "X",
     width - 31,
     11
 )
 
 -- Volta para as cores normais
-System.setTextColor(WHITE, BLUE)
+Display.setTextColor(WHITE, BLUE)
 
 -- Loop principal
 while true do
@@ -99,7 +99,7 @@ while true do
     -- TOUCHSCREEN
     ------------------------------------------------
 
-    local touch = System.getTouch()
+    local touch = Input.getTouch()
 
     if touch.touched then
 
@@ -116,7 +116,7 @@ while true do
     -- KEYBOARD
     ------------------------------------------------
 
-    local key = System.getKey()
+    local key = Input.getKey()
 
     -- ESC = sair
     if key == "ESC" then
@@ -127,7 +127,7 @@ while true do
     -- CHARACTER INPUT
     ------------------------------------------------
 
-    local char = System.getChar()
+    local char = Input.getChar()
 
     if char ~= "" then
         -- Entrada de caracteres disponível.
@@ -138,7 +138,7 @@ while true do
     -- KERNEL / GARBAGE COLLECTION
     ------------------------------------------------
 
-    System.delay(10)
+    Harix.delay(10)
 
 end
 
@@ -146,4 +146,4 @@ end
 -- CLEANUP
 ------------------------------------------------
 
-System.fillScreen(BLUE)
+Display.fillScreen(BLUE)
